@@ -3,7 +3,7 @@ import { PredictionCard } from "../components/PredictionCard";
 import { usePolymarket } from "../hooks/usePolymarket";
 
 const WINNER_SLUG = "world-cup-winner";
-const SCORER_SLUG = "world-cup-top-goalscorer";
+const SCORER_SLUG = "world-cup-golden-boot-winner";
 
 export function Predictions() {
   const winner = usePolymarket(WINNER_SLUG);
@@ -38,7 +38,7 @@ export function Predictions() {
             {scorer.market && <PredictionCard market={scorer.market} />}
             {scorer.error && !scorer.market && (
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h2 className="mb-4 text-lg font-semibold text-text">Top Goalscorer</h2>
+                <h2 className="mb-4 text-lg font-semibold text-text">Golden Boot Winner</h2>
                 <p className="text-sm text-text-muted">Market not currently available on Polymarket.</p>
               </div>
             )}
