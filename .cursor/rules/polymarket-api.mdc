@@ -1,0 +1,46 @@
+---
+description: How to query Polymarket APIs for World Cup match predictions
+globs: src/hooks/usePolymarket.ts, src/hooks/use*.ts, src/pages/Predictions.tsx
+alwaysApply: false
+---
+
+# Polymarket API Guide
+
+## Endpoints
+
+| Purpose | Endpoint | Notes |
+|---------|----------|-------|
+| Get event by slug | `GET https://gamma-api.polymarket.com/events?slug={slug}` | Only exact slug match works |
+| Get all FIFA WC matches | `GET https://gamma-api.polymarket.com/events?series_id=11433&closed=false&limit=200` | Single call, returns all match events |
+| Text search | `GET https://api.copilot.markets/gamma/public-search?q={query}&limit_per_type=10` | Full-text search across all events |
+
+## Fetching World Cup Match Predictions
+
+Use `series_id=11433` to get all FIFA World Cup match events in one call. Do NOT guess slugs or iterate — slugs use inconsistent country codes and may change.
+
+Each match typically has 3 event types — filter by title:
+- **Match result**: "Mexico vs. South Africa" (use these)
+- **Halftime**: title contains "Halftime Result" (skip unless needed)
+- **Exact score**: title contains "Exact Score" (skip unless needed)
+
+## Event Structure (key fields)
+
+- `title`: match name, e.g. "Mexico vs. South Africa"
+- `endDate`: match datetime (ISO 8601)
+- `markets[]`: array of outcomes (win/draw/lose)
+  - `groupItemTitle`: outcome label, e.g. "Mexico", "Draw (...)"
+  - `outcomePrices`: JSON string `["0.665","0.335"]` — index 0 is Yes probability
+  - `outcomePrices` can be `null` — always filter before `JSON.parse`
+- `teams[]`: structured team data with `name`, `abbreviation`, `logo`, `ordering` (home/away)
+- `series[].id`: `"11433"` for FIFA World Cup
+
+## The Gamma events API does NOT support text search
+
+Parameters like `title`, `text`, `search`, `tag`, `series`, `sport` are silently ignored and return default results. Only these filters work:
+- `slug` (exact match)
+- `series_id` (numeric ID)
+- `tag_id` (numeric ID, e.g. `102232` for FIFA World Cup tag)
+- `closed` (boolean)
+- `limit` / `offset` (pagination)
+
+For text search, use the `public-search` endpoint above.
