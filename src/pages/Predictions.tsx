@@ -46,10 +46,10 @@ export function Predictions() {
         )}
 
         <footer className="mt-10 flex flex-col items-center gap-2 text-text-muted">
-          <span className="text-xs">Visitors</span>
+          <span className="text-xs">Page visits</span>
           <img
             src="https://count.getloli.com/@worldcup-poly-aggregator?theme=3d-num"
-            alt="Visitor count"
+            alt="Page visit count"
             className="h-8"
           />
         </footer>
