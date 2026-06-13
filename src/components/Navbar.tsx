@@ -1,8 +1,8 @@
 import { NavLink } from "react-router";
 
 const links = [
-  { to: "/", label: "Main" },
-  { to: "/schedule", label: "Schedule" },
+  { to: "/", label: "Schedule" },
+  { to: "/overall", label: "Overall" },
 ] as const;
 
 export function Navbar({ onRefresh }: { onRefresh?: () => void }) {

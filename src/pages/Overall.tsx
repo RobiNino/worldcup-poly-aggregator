@@ -5,7 +5,7 @@ import { usePolymarket } from "../hooks/usePolymarket";
 const WINNER_SLUG = "world-cup-winner";
 const SCORER_SLUG = "world-cup-golden-boot-winner";
 
-export function Predictions() {
+export function Overall() {
   const winner = usePolymarket(WINNER_SLUG);
   const scorer = usePolymarket(SCORER_SLUG);
 
@@ -22,7 +22,7 @@ export function Predictions() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-8 text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
           World Cup 2026{" "}
-          <span className="text-accent">Predictions</span>
+          <span className="text-accent">Overall</span>
         </h1>
 
         {loading && (

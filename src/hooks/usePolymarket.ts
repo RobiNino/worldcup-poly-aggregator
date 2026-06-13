@@ -7,7 +7,7 @@ import type {
   OddEntry,
 } from "../types";
 
-// --- Slug-based hook (used by Predictions page) ---
+// --- Slug-based hook (used by Overall page) ---
 
 interface GammaMarket {
   question: string;
