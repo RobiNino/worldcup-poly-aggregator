@@ -27,9 +27,20 @@ export function israelDate(m: RawMatch): string {
   }).format(new Date(ms));
 }
 
+// A match is "over" ~2.5h after kickoff, or once a final score exists.
+const MATCH_DURATION_MS = 2.5 * 60 * 60 * 1000;
+
+export function isGameOver(m: RawMatch, now: number = Date.now()): boolean {
+  if (m.score?.ft) return true;
+  const kickoff = matchToUtcMs(m);
+  if (!kickoff) return false; // TBD / unparseable -> keep it
+  return now - kickoff >= MATCH_DURATION_MS;
+}
+
 export function groupByDate(matches: RawMatch[]): Round[] {
   const map = new Map<string, RawMatch[]>();
   for (const m of matches) {
+    if (isGameOver(m)) continue;
     const key = israelDate(m);
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(m);
@@ -37,7 +48,9 @@ export function groupByDate(matches: RawMatch[]): Round[] {
   return Array.from(map, ([name, dayMatches]) => ({
     name,
     matches: dayMatches.sort((a, b) => matchToUtcMs(a) - matchToUtcMs(b)),
-  })).sort((a, b) => matchToUtcMs(a.matches[0]) - matchToUtcMs(b.matches[0]));
+  }))
+    .filter((r) => r.matches.length > 0)
+    .sort((a, b) => matchToUtcMs(a.matches[0]) - matchToUtcMs(b.matches[0]));
 }
 
 export function useSchedule() {
