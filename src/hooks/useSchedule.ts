@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import type { ScheduleData, RawMatch, Round } from "../types";
+import type { ScheduleData, RawMatch, Round, ScorerTally } from "../types";
+import { normalizePlayerName } from "./usePolymarket";
 
 const SCHEDULE_URL =
   "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
@@ -43,6 +44,24 @@ export function completedMatches(matches: RawMatch[]): RawMatch[] {
     .sort((a, b) => matchToUtcMs(b) - matchToUtcMs(a));
 }
 
+export function buildScorerTally(matches: RawMatch[]): Map<string, ScorerTally> {
+  const tally = new Map<string, ScorerTally>();
+  for (const m of matches) {
+    for (const goal of [...(m.goals1 ?? []), ...(m.goals2 ?? [])]) {
+      if (goal.owngoal) continue;
+      const key = normalizePlayerName(goal.name);
+      if (!key) continue;
+      const entry = tally.get(key);
+      if (entry) {
+        entry.goals += 1;
+      } else {
+        tally.set(key, { name: goal.name, goals: 1 });
+      }
+    }
+  }
+  return tally;
+}
+
 export function groupByDate(matches: RawMatch[]): Round[] {
   const map = new Map<string, RawMatch[]>();
   for (const m of matches) {
@@ -62,6 +81,7 @@ export function groupByDate(matches: RawMatch[]): Round[] {
 export function useSchedule() {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [completed, setCompleted] = useState<RawMatch[]>([]);
+  const [scorerTally, setScorerTally] = useState<Map<string, ScorerTally>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,6 +94,7 @@ export function useSchedule() {
       const data: ScheduleData = await res.json();
       setRounds(groupByDate(data.matches));
       setCompleted(completedMatches(data.matches));
+      setScorerTally(buildScorerTally(data.matches));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -85,5 +106,5 @@ export function useSchedule() {
     fetchData();
   }, [fetchData]);
 
-  return { rounds, completed, loading, error, refresh: fetchData };
+  return { rounds, completed, scorerTally, loading, error, refresh: fetchData };
 }

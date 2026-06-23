@@ -7,8 +7,11 @@ import {
   parseOutcomes,
   buildOddsMap,
   teamVariants,
+  normalizePlayerName,
+  playerTokenKey,
+  getGoalCount,
 } from "./usePolymarket";
-import type { PolymarketRawEvent } from "../types";
+import type { PolymarketRawEvent, ScorerTally } from "../types";
 
 describe("normalizeTitle", () => {
   it("lowercases and strips non-alpha characters", () => {
@@ -219,5 +222,47 @@ describe("buildOddsMap", () => {
   it("handles empty event list", () => {
     const map = buildOddsMap([]);
     expect(map.size).toBe(0);
+  });
+});
+
+describe("normalizePlayerName", () => {
+  it("strips accents and lowercases", () => {
+    expect(normalizePlayerName("Kylian Mbappé")).toBe("kylian mbappe");
+    expect(normalizePlayerName("Vinícius Júnior")).toBe("vinicius junior");
+    expect(normalizePlayerName("Ousmane Dembélé")).toBe("ousmane dembele");
+  });
+
+  it("removes punctuation and collapses spaces", () => {
+    expect(normalizePlayerName("Hwang In-Beom")).toBe("hwang in beom");
+    expect(normalizePlayerName("  Harry   Kane  ")).toBe("harry kane");
+  });
+});
+
+describe("playerTokenKey", () => {
+  it("is order-independent", () => {
+    expect(playerTokenKey("Heung-Min Son")).toBe(playerTokenKey("Son Heung Min"));
+  });
+});
+
+describe("getGoalCount", () => {
+  const tally = new Map<string, ScorerTally>([
+    ["kylian mbappe", { name: "Kylian Mbappé", goals: 4 }],
+    ["harry kane", { name: "Harry Kane", goals: 2 }],
+  ]);
+
+  it("matches accented Polymarket-style names", () => {
+    expect(getGoalCount("Kylian Mbappe", tally)).toBe(4);
+    expect(getGoalCount("Harry Kane", tally)).toBe(2);
+  });
+
+  it("returns 0 for players not in the tally", () => {
+    expect(getGoalCount("Lionel Messi", tally)).toBe(0);
+  });
+
+  it("falls back to token-set matching for word-order differences", () => {
+    const reordered = new Map<string, ScorerTally>([
+      ["son heung min", { name: "Son Heung-Min", goals: 3 }],
+    ]);
+    expect(getGoalCount("Heung-Min Son", reordered)).toBe(3);
   });
 });

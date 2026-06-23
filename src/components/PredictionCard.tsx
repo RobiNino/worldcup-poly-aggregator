@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Market } from "../types";
 
 function formatVolume(v: number): string {
@@ -9,9 +10,11 @@ function formatVolume(v: number): string {
 export function PredictionCard({
   market,
   limit = 10,
+  renderBadge,
 }: {
   market: Market;
   limit?: number;
+  renderBadge?: (name: string) => ReactNode;
 }) {
   const top = market.outcomes.slice(0, limit);
 
@@ -28,7 +31,10 @@ export function PredictionCard({
               </span>
               <div className="min-w-0 flex-1">
                 <div className="mb-0.5 flex items-baseline justify-between gap-2">
-                  <span className="truncate text-sm font-medium">{o.name}</span>
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="truncate text-sm font-medium">{o.name}</span>
+                    {renderBadge?.(o.name)}
+                  </span>
                   <span className="shrink-0 text-xs text-text-muted">
                     {formatVolume(o.volume)}
                   </span>

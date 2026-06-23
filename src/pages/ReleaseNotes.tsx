@@ -8,7 +8,11 @@ type Release = {
 const RELEASES: Release[] = [
   {
     date: "2026-06-23",
-    changes: ["Show previous match scores in the schedule's expandable match view"],
+    changes: [
+      "Show previous match scores in the schedule's expandable match view",
+      "Split the Overall tab into separate Overall Winner and Golden Boot pages",
+      "Golden Boot page now shows each player's current goal count next to their odds",
+    ],
   },
   {
     date: "2026-06-13",

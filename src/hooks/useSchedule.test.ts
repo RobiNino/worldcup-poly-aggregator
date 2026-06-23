@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { matchToUtcMs, israelDate, groupByDate, completedMatches } from "./useSchedule";
+import { matchToUtcMs, israelDate, groupByDate, completedMatches, buildScorerTally } from "./useSchedule";
 import type { RawMatch } from "../types";
 
 function match(overrides: Partial<RawMatch>): RawMatch {
@@ -123,5 +123,41 @@ describe("completedMatches", () => {
 
     const done = completedMatches(matches);
     expect(done.map((m) => m.team1)).toEqual(["Later", "Middle", "First"]);
+  });
+});
+
+describe("buildScorerTally", () => {
+  it("counts goals per player across both teams", () => {
+    const matches: RawMatch[] = [
+      match({
+        goals1: [{ name: "Lionel Messi" }, { name: "Lautaro Martínez" }],
+        goals2: [{ name: "Harry Kane" }],
+      }),
+      match({ goals1: [{ name: "Lionel Messi" }] }),
+    ];
+
+    const tally = buildScorerTally(matches);
+    expect(tally.get("lionel messi")?.goals).toBe(2);
+    expect(tally.get("harry kane")?.goals).toBe(1);
+    expect(tally.get("lautaro martinez")?.goals).toBe(1);
+  });
+
+  it("excludes own goals", () => {
+    const matches: RawMatch[] = [
+      match({ goals1: [{ name: "Defender X", owngoal: true }, { name: "Striker Y" }] }),
+    ];
+
+    const tally = buildScorerTally(matches);
+    expect(tally.has("defender x")).toBe(false);
+    expect(tally.get("striker y")?.goals).toBe(1);
+  });
+
+  it("preserves the original display name", () => {
+    const matches: RawMatch[] = [
+      match({ goals1: [{ name: "Kylian Mbappé" }] }),
+    ];
+
+    const tally = buildScorerTally(matches);
+    expect(tally.get("kylian mbappe")?.name).toBe("Kylian Mbappé");
   });
 });

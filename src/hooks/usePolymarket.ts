@@ -5,6 +5,7 @@ import type {
   PolymarketOdds,
   PolymarketRawEvent,
   OddEntry,
+  ScorerTally,
 } from "../types";
 
 // --- Slug-based hook (used by Overall page) ---
@@ -128,6 +129,35 @@ export function matchesTeams(eventTitle: string, team1: string, team2: string): 
   const t1Variants = teamVariants(team1);
   const t2Variants = teamVariants(team2);
   return t1Variants.some((v) => norm.includes(v)) && t2Variants.some((v) => norm.includes(v));
+}
+
+// --- Player name normalization (used to match goal scorers to Golden Boot names) ---
+
+export function normalizePlayerName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function playerTokenKey(name: string): string {
+  return normalizePlayerName(name).split(" ").filter(Boolean).sort().join(" ");
+}
+
+export function getGoalCount(
+  playerName: string,
+  tally: Map<string, ScorerTally>
+): number {
+  const direct = tally.get(normalizePlayerName(playerName));
+  if (direct) return direct.goals;
+  const tokenKey = playerTokenKey(playerName);
+  for (const entry of tally.values()) {
+    if (playerTokenKey(entry.name) === tokenKey) return entry.goals;
+  }
+  return 0;
 }
 
 export function isHalftimeEvent(title: string): boolean {

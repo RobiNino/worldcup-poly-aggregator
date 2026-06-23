@@ -142,13 +142,6 @@ function OddsPanel({
           </div>
         </>
       )}
-      <div className={top5.length > 0 ? "mt-3 border-t border-border pt-3" : ""}>
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">Previous Matches</p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <PreviousMatches team={team1} completed={completed} />
-          <PreviousMatches team={team2} completed={completed} />
-        </div>
-      </div>
       {polymarketSlug && (
         <a
           href={`https://polymarket.com/event/${polymarketSlug}`}
@@ -160,6 +153,13 @@ function OddsPanel({
           View on Polymarket ↗
         </a>
       )}
+      <div className="mt-3 border-t border-border pt-3">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">Previous Matches</p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <PreviousMatches team={team1} completed={completed} />
+          <PreviousMatches team={team2} completed={completed} />
+        </div>
+      </div>
     </div>
   );
 }

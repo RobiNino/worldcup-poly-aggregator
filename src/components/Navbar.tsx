@@ -2,7 +2,8 @@ import { NavLink } from "react-router";
 
 const links = [
   { to: "/", label: "Schedule" },
-  { to: "/overall", label: "Overall" },
+  { to: "/overall", label: "Overall Winner" },
+  { to: "/golden-boot", label: "Golden Boot" },
   { to: "/release-notes", label: "Release Notes" },
 ] as const;
 

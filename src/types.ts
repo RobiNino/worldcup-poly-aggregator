@@ -32,6 +32,13 @@ export interface PolymarketRawEvent {
   markets: PolymarketRawMarket[];
 }
 
+export interface GoalEntry {
+  name: string;
+  minute?: string;
+  penalty?: boolean;
+  owngoal?: boolean;
+}
+
 export interface RawMatch {
   date: string;
   time: string;
@@ -41,6 +48,13 @@ export interface RawMatch {
   group?: string;
   round: string;
   ground?: string;
+  goals1?: GoalEntry[];
+  goals2?: GoalEntry[];
+}
+
+export interface ScorerTally {
+  name: string;
+  goals: number;
 }
 
 export interface Round {
