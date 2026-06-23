@@ -54,7 +54,19 @@ const COUNTRY_CODES: Record<string, string> = {
   "uzbekistan": "UZ",
 };
 
+// Subdivision flags (England, Scotland, Wales) use Unicode tag sequences:
+// the black flag base (U+1F3F4) followed by the lowercased ISO 3166-2 code
+// as tag characters, terminated by the cancel tag (U+E007F).
+const SUBDIVISION_FLAGS: Record<string, string> = {
+  "GB-ENG": "\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}",
+  "GB-SCT": "\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}",
+  "GB-WLS": "\u{1F3F4}\u{E0067}\u{E0062}\u{E0077}\u{E006C}\u{E0073}\u{E007F}",
+};
+
 function codeToFlag(code: string): string {
+  const subdivision = SUBDIVISION_FLAGS[code.toUpperCase()];
+  if (subdivision) return subdivision;
+
   const base = code.slice(0, 2).toUpperCase();
   return [...base]
     .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
