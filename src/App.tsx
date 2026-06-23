@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from "react-router";
 import { Overall } from "./pages/Overall";
+import { ReleaseNotes } from "./pages/ReleaseNotes";
 import { Schedule } from "./pages/Schedule";
 
 export default function App() {
@@ -9,6 +10,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Schedule />} />
           <Route path="/overall" element={<Overall />} />
+          <Route path="/release-notes" element={<ReleaseNotes />} />
         </Routes>
       </div>
     </HashRouter>

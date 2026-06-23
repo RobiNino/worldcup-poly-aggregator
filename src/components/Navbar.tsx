@@ -3,6 +3,7 @@ import { NavLink } from "react-router";
 const links = [
   { to: "/", label: "Schedule" },
   { to: "/overall", label: "Overall" },
+  { to: "/release-notes", label: "Release Notes" },
 ] as const;
 
 export function Navbar({ onRefresh }: { onRefresh?: () => void }) {
