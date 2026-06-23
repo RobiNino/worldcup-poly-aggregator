@@ -165,13 +165,13 @@ function OddsPanel({
 }
 
 export function Schedule() {
-  const { rounds, completed, loading, error, refresh } = useSchedule();
+  const { rounds, completed, loading, error } = useSchedule();
   const { getOdds } = useMatchOdds();
   const [expandedTile, setExpandedTile] = useState<string | null>(null);
 
   return (
     <>
-      <Navbar onRefresh={refresh} />
+      <Navbar />
       <main className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="mb-8 text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
           Match <span className="text-accent">Schedule</span>

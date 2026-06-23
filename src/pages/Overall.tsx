@@ -9,7 +9,7 @@ export function Overall() {
 
   return (
     <>
-      <Navbar onRefresh={winner.refresh} />
+      <Navbar />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <h1 className="mb-8 text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
           Overall{" "}

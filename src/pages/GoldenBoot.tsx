@@ -7,16 +7,11 @@ const SCORER_SLUG = "world-cup-golden-boot-winner";
 
 export function GoldenBoot() {
   const scorer = usePolymarket(SCORER_SLUG);
-  const { scorerTally, refresh: refreshSchedule } = useSchedule();
-
-  const refresh = () => {
-    scorer.refresh();
-    refreshSchedule();
-  };
+  const { scorerTally } = useSchedule();
 
   return (
     <>
-      <Navbar onRefresh={refresh} />
+      <Navbar />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <h1 className="mb-8 text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
           Golden Boot{" "}
