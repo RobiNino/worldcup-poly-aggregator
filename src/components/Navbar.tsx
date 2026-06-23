@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 
 const links = [
   { to: "/", label: "Schedule" },
@@ -11,9 +11,12 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface/80 px-6 py-3 backdrop-blur">
       <div className="flex items-center gap-6">
-        <span className="text-lg font-bold tracking-tight">
+        <Link
+          to="/"
+          className="text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
+        >
           <span className="text-accent">WC</span> 2026
-        </span>
+        </Link>
         {links.map((l) => (
           <NavLink
             key={l.to}
