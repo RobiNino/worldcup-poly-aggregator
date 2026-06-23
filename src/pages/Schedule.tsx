@@ -3,6 +3,7 @@ import { Navbar } from "../components/Navbar";
 import { useSchedule } from "../hooks/useSchedule";
 import { useMatchOdds } from "../hooks/usePolymarket";
 import { getFlag } from "../utils/countryFlags";
+import { getTeamInfo, formatSquadValue } from "../data/teamInfo";
 import type { PolymarketOdds, RawMatch } from "../types";
 
 function parseUtcOffset(time: string): string | null {
@@ -112,6 +113,27 @@ function PreviousMatches({ team, completed }: { team: string; completed: RawMatc
   );
 }
 
+function TeamStat({ team }: { team: string }) {
+  const info = getTeamInfo(team);
+  return (
+    <div className="flex-1">
+      <p className="mb-1 text-xs font-semibold">
+        {getFlag(team)} {team}
+      </p>
+      {info ? (
+        <>
+          <p className="text-xs text-text-muted">FIFA Rank #{info.fifaRank}</p>
+          <p className="text-xs text-text-muted">
+            Squad Value: {formatSquadValue(info.squadValueEur)}
+          </p>
+        </>
+      ) : (
+        <p className="text-xs text-text-muted">No data</p>
+      )}
+    </div>
+  );
+}
+
 function OddsPanel({
   odds,
   team1,
@@ -158,6 +180,13 @@ function OddsPanel({
         <div className="flex flex-col gap-3 sm:flex-row">
           <PreviousMatches team={team1} completed={completed} />
           <PreviousMatches team={team2} completed={completed} />
+        </div>
+      </div>
+      <div className="mt-3 border-t border-border pt-3">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">Team Info</p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <TeamStat team={team1} />
+          <TeamStat team={team2} />
         </div>
       </div>
     </div>

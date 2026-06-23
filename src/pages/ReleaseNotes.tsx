@@ -9,6 +9,7 @@ const RELEASES: Release[] = [
   {
     date: "2026-06-23",
     changes: [
+      "Show each team's FIFA ranking and total squad value in the schedule's expandable match view",
       "Show previous match scores in the schedule's expandable match view",
       "Split the Overall tab into separate Overall Winner and Golden Boot pages",
       "Golden Boot page now shows each player's current goal count next to their odds",
