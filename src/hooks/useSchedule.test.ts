@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { matchToUtcMs, israelDate, groupByDate } from "./useSchedule";
+import { matchToUtcMs, israelDate, groupByDate, completedMatches } from "./useSchedule";
 import type { RawMatch } from "../types";
 
 function match(overrides: Partial<RawMatch>): RawMatch {
@@ -92,5 +92,36 @@ describe("groupByDate", () => {
     const groups = groupByDate(matches);
     expect(groups[0].matches[0].team1).toBe("Early");
     expect(groups[0].matches[1].team1).toBe("Late");
+  });
+});
+
+describe("completedMatches", () => {
+  it("returns only games with a final score", () => {
+    const matches: RawMatch[] = [
+      match({ date: "2026-06-11", time: "13:00 UTC-6", team1: "Mexico", team2: "South Africa", score: { ft: [2, 0] } }),
+      match({ date: "2030-06-12", time: "15:00 UTC-4", team1: "Canada", team2: "Bosnia" }),
+    ];
+
+    const done = completedMatches(matches);
+    expect(done).toHaveLength(1);
+    expect(done[0].team1).toBe("Mexico");
+  });
+
+  it("treats games >2.5h past kickoff as completed even without a score", () => {
+    const longAgo = match({ date: "2026-06-11", time: "13:00 UTC-6", team1: "Old" });
+    // No score, but kickoff is far in the past -> isGameOver true, but no ft -> excluded
+    const done = completedMatches([longAgo]);
+    expect(done).toHaveLength(0);
+  });
+
+  it("sorts completed matches most recent first", () => {
+    const matches: RawMatch[] = [
+      match({ date: "2026-06-11", time: "13:00 UTC-6", team1: "First", score: { ft: [1, 0] } }),
+      match({ date: "2026-06-13", time: "13:00 UTC-6", team1: "Later", score: { ft: [2, 2] } }),
+      match({ date: "2026-06-12", time: "13:00 UTC-6", team1: "Middle", score: { ft: [0, 0] } }),
+    ];
+
+    const done = completedMatches(matches);
+    expect(done.map((m) => m.team1)).toEqual(["Later", "Middle", "First"]);
   });
 });

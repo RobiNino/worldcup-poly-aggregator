@@ -37,6 +37,12 @@ export function isGameOver(m: RawMatch, now: number = Date.now()): boolean {
   return now - kickoff >= MATCH_DURATION_MS;
 }
 
+export function completedMatches(matches: RawMatch[]): RawMatch[] {
+  return matches
+    .filter((m) => isGameOver(m) && m.score?.ft != null)
+    .sort((a, b) => matchToUtcMs(b) - matchToUtcMs(a));
+}
+
 export function groupByDate(matches: RawMatch[]): Round[] {
   const map = new Map<string, RawMatch[]>();
   for (const m of matches) {
@@ -55,6 +61,7 @@ export function groupByDate(matches: RawMatch[]): Round[] {
 
 export function useSchedule() {
   const [rounds, setRounds] = useState<Round[]>([]);
+  const [completed, setCompleted] = useState<RawMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +73,7 @@ export function useSchedule() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ScheduleData = await res.json();
       setRounds(groupByDate(data.matches));
+      setCompleted(completedMatches(data.matches));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -77,5 +85,5 @@ export function useSchedule() {
     fetchData();
   }, [fetchData]);
 
-  return { rounds, loading, error, refresh: fetchData };
+  return { rounds, completed, loading, error, refresh: fetchData };
 }

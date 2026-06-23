@@ -3,7 +3,7 @@ import { Navbar } from "../components/Navbar";
 import { useSchedule } from "../hooks/useSchedule";
 import { useMatchOdds } from "../hooks/usePolymarket";
 import { getFlag } from "../utils/countryFlags";
-import type { PolymarketOdds } from "../types";
+import type { PolymarketOdds, RawMatch } from "../types";
 
 function parseUtcOffset(time: string): string | null {
   const match = time.match(/^(\d{1,2}):(\d{2})\s*UTC([+-]\d+)$/);
@@ -55,14 +55,81 @@ function findDrawOdd(odds: PolymarketOdds): number | null {
   return entry ? entry.probability : null;
 }
 
-function OddsPanel({ odds }: { odds: PolymarketOdds }) {
+function namesMatch(a: string, b: string): boolean {
+  const aLower = a.toLowerCase();
+  const bLower = b.toLowerCase();
+  const aVariants = [aLower, ...(DISPLAY_ALIASES[aLower] || [])];
+  const bVariants = [bLower, ...(DISPLAY_ALIASES[bLower] || [])];
+  return aVariants.some((av) =>
+    bVariants.some((bv) => av === bv || av.includes(bv) || bv.includes(av))
+  );
+}
+
+function getTeamHistory(team: string, completed: RawMatch[]): RawMatch[] {
+  return completed.filter(
+    (m) => namesMatch(team, m.team1) || namesMatch(team, m.team2)
+  );
+}
+
+function PreviousMatches({ team, completed }: { team: string; completed: RawMatch[] }) {
+  const history = getTeamHistory(team, completed);
+  return (
+    <div className="flex-1">
+      <p className="mb-1 text-xs font-semibold">
+        {getFlag(team)} {team}
+      </p>
+      {history.length === 0 ? (
+        <p className="text-xs text-text-muted">No previous matches</p>
+      ) : (
+        <ul className="space-y-1">
+          {history.map((m, idx) => {
+            const ft = m.score!.ft;
+            const teamIsHome = namesMatch(team, m.team1);
+            const teamScore = teamIsHome ? ft[0] : ft[1];
+            const oppScore = teamIsHome ? ft[1] : ft[0];
+            const opponent = teamIsHome ? m.team2 : m.team1;
+            const result =
+              teamScore > oppScore ? "W" : teamScore < oppScore ? "L" : "D";
+            const resultColor =
+              result === "W"
+                ? "text-green-500"
+                : result === "L"
+                  ? "text-accent"
+                  : "text-text-muted";
+            return (
+              <li key={`${m.team1}-${m.team2}-${idx}`} className="text-xs text-text-muted">
+                <span className={`font-semibold ${resultColor}`}>{result}</span>{" "}
+                <span className="font-medium text-text">
+                  {teamScore} – {oppScore}
+                </span>{" "}
+                vs {getFlag(opponent)} {opponent}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function OddsPanel({
+  odds,
+  team1,
+  team2,
+  completed,
+}: {
+  odds: PolymarketOdds;
+  team1: string;
+  team2: string;
+  completed: RawMatch[];
+}) {
   const top5 = odds.exactScore.slice(0, 5);
   const polymarketSlug = odds.exactScoreSlug || odds.slug;
   return (
     <div className="mt-2 rounded-md border border-border bg-background px-4 py-3">
       {top5.length > 0 && (
         <>
-          <p className="mb-2 text-xs font-semibold text-text-muted">Top Exact Score Predictions</p>
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">Top Exact Score Predictions</p>
           <div className="flex flex-wrap gap-2">
             {top5.map((o) => (
               <span
@@ -75,6 +142,13 @@ function OddsPanel({ odds }: { odds: PolymarketOdds }) {
           </div>
         </>
       )}
+      <div className={top5.length > 0 ? "mt-3 border-t border-border pt-3" : ""}>
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">Previous Matches</p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <PreviousMatches team={team1} completed={completed} />
+          <PreviousMatches team={team2} completed={completed} />
+        </div>
+      </div>
       {polymarketSlug && (
         <a
           href={`https://polymarket.com/event/${polymarketSlug}`}
@@ -91,7 +165,7 @@ function OddsPanel({ odds }: { odds: PolymarketOdds }) {
 }
 
 export function Schedule() {
-  const { rounds, loading, error, refresh } = useSchedule();
+  const { rounds, completed, loading, error, refresh } = useSchedule();
   const { getOdds } = useMatchOdds();
   const [expandedTile, setExpandedTile] = useState<string | null>(null);
 
@@ -171,7 +245,14 @@ export function Schedule() {
                             </div>
                           </div>
                         </div>
-                        {isExpanded && hasOdds && <OddsPanel odds={odds!} />}
+                        {isExpanded && hasOdds && (
+                          <OddsPanel
+                            odds={odds!}
+                            team1={m.team1}
+                            team2={m.team2}
+                            completed={completed}
+                          />
+                        )}
                       </div>
                     );
                   })}
